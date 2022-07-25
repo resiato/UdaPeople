@@ -40,15 +40,35 @@ jobs:
 
   test-frontend:
     <<: *defaults
-    steps: cd frontend
-      npm install
-      npm run test
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-test]
+      - run:
+          name: Test front-end
+          command: |
+            cd frontend
+            npm install
+            npm run test
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-test
 
   test-backend:
     <<: *defaults
-    steps: cd frontend
-      npm install
-      npm run test
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-test]
+      - run:
+          name: Test back-end
+          command: |
+            cd frontend
+            npm install
+            npm run test
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-test
 
 workflows:
   default:
