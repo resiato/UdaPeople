@@ -140,7 +140,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"" \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Add back-end ip to ansible inventory
@@ -151,6 +151,38 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+      - destroy-environment
+
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["98:18:fd:25:d7:fc:e5:d1:93:20:f6:d3:28:31:4a:d2"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            # install the dependencies needed for your playbook
+            apk add --update ansible
+            apk add --no-cache tar
+            apk add --no-cache \
+            python3 \
+            py3-pip \
+            && pip3 install --upgrade pip \
+            && pip3 install \
+                awscli \
+            && rm -rf /var/cache/apk/*
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
+          environment:
+            ANSIBLE_HOST_KEY_CHECKING: false
       - destroy-environment
 
 workflows:
