@@ -11,7 +11,7 @@ commands:
           when: on_fail
           command: |
             echo "Destroying environments ${CIRCLE_WORKFLOW_ID:0:7}"
-            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+            # aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -197,7 +197,6 @@ jobs:
           command: |
             cd backend
             npm install
-            npm run migrations:revert
             npm run migrations > migrations_dump.txt
             echo `cat migrations_dump.txt`
       - run:
@@ -215,6 +214,8 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - attach workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
@@ -245,7 +246,8 @@ jobs:
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment
-
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          
   deploy-backend:
     docker:
       - image: python:3.7-alpine3.11
