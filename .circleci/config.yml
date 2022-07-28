@@ -293,6 +293,7 @@ jobs:
             cd ..
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
 
+      - run:
           name: Deploy backend
           command: |
             export TYPEORM_MIGRATIONS_DIR=./migrations
